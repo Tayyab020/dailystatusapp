@@ -20,7 +20,8 @@ const loadGoogleIdentityServices = () => {
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Google Identity Services"));
+    script.onerror = () =>
+      reject(new Error("Failed to load Google Identity Services"));
     document.head.appendChild(script);
   });
 };
@@ -81,10 +82,7 @@ const loadGapiClient = () => {
  */
 export const initGmailApi = async () => {
   try {
-    await Promise.all([
-      loadGoogleIdentityServices(),
-      loadGapiClient(),
-    ]);
+    await Promise.all([loadGoogleIdentityServices(), loadGapiClient()]);
     console.log("Gmail API initialized successfully");
   } catch (error) {
     console.error("Gmail API init error:", error);
@@ -102,55 +100,60 @@ export const signInGmail = async () => {
 
     return new Promise((resolve, reject) => {
       const clientId = import.meta.env.VITE_GMAIL_CLIENT_ID;
-      
+
       if (!clientId) {
         reject(new Error("Gmail Client ID not configured"));
         return;
       }
 
       // Use Google Identity Services to get access token
-      window.google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: "https://www.googleapis.com/auth/gmail.send",
-        callback: async (response) => {
-          if (response.error) {
-            reject(new Error(response.error));
-            return;
-          }
+      window.google.accounts.oauth2
+        .initTokenClient({
+          client_id: clientId,
+          scope: "https://www.googleapis.com/auth/gmail.send",
+          callback: async (response) => {
+            if (response.error) {
+              reject(new Error(response.error));
+              return;
+            }
 
-          accessToken = response.access_token;
-          
-          // Set the access token for gapi.client
-          if (gapiClient) {
-            gapiClient.setToken({ access_token: accessToken });
-          }
+            accessToken = response.access_token;
 
-          // Get user info
-          try {
-            const profileResponse = await fetch(
-              `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`
-            );
-            const profile = await profileResponse.json();
-            currentUserEmail = profile.email;
+            // Set the access token for gapi.client
+            if (gapiClient) {
+              gapiClient.setToken({ access_token: accessToken });
+            }
 
-            resolve({
-              success: true,
-              user: currentUserEmail,
-            });
-          } catch (error) {
-            // If we can't get email, still resolve with success
-            resolve({
-              success: true,
-              user: "user@example.com", // fallback
-            });
-          }
-        },
-      }).requestAccessToken();
+            // Get user info
+            try {
+              const profileResponse = await fetch(
+                `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`
+              );
+              const profile = await profileResponse.json();
+              currentUserEmail = profile.email;
+
+              resolve({
+                success: true,
+                user: currentUserEmail,
+              });
+            } catch {
+              // If we can't get email, still resolve with success
+              resolve({
+                success: true,
+                user: "user@example.com", // fallback
+              });
+            }
+          },
+        })
+        .requestAccessToken();
     });
   } catch (error) {
     console.error("Gmail sign in error:", error);
-    
-    if (error.error === "popup_closed_by_user" || error.error === "access_denied") {
+
+    if (
+      error.error === "popup_closed_by_user" ||
+      error.error === "access_denied"
+    ) {
       return {
         success: false,
         error: "Sign in cancelled",
@@ -174,14 +177,14 @@ export const signOutGmail = async () => {
         console.log("Access token revoked");
       });
     }
-    
+
     accessToken = null;
     currentUserEmail = null;
-    
+
     if (gapiClient) {
       gapiClient.setToken(null);
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error("Gmail sign out error:", error);

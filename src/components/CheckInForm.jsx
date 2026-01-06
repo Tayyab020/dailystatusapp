@@ -198,34 +198,67 @@ const CheckInForm = ({ open, onClose, type }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {title}
-        <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5 }}>
-          To: {settings.attendanceEmail}
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          m: { xs: 1, sm: 2 },
+        }
+      }}
+      fullScreen={false}
+    >
+      <DialogTitle
+        sx={{
+          background: 'linear-gradient(135deg, #FF6B35 0%, #FF8C65 100%)',
+          color: 'white',
+          py: 2.5,
+          px: 3,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+          {title}
+        </Typography>
+        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.9)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <EmailIcon sx={{ fontSize: 14 }} />
+          {settings.attendanceEmail}
         </Typography>
       </DialogTitle>
 
-      <DialogContent>
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Subject Preview:
+      <DialogContent sx={{ px: 3, py: 3, background: '#FAF0E6' }}>
+        {/* Subject Preview */}
+        <Box 
+          sx={{ 
+            mb: 3,
+            p: 2,
+            background: 'white',
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mb: 1, fontWeight: 600 }}>
+            📋 Subject Preview
           </Typography>
           <Typography
             variant="body2"
             sx={{
               p: 1.5,
-              bgcolor: 'grey.100',
-              borderRadius: 1,
-              whiteSpace: 'pre-line'
+              bgcolor: 'secondary.light',
+              borderRadius: 1.5,
+              whiteSpace: 'pre-line',
+              color: 'text.primary',
+              fontWeight: 500,
             }}
           >
             {subject}
           </Typography>
         </Box>
 
-        <Divider sx={{ my: 2 }} />
-
+        {/* Location Selector */}
         <LocationSelector
           location={location}
           setLocation={setLocation}
@@ -234,23 +267,43 @@ const CheckInForm = ({ open, onClose, type }) => {
           savedReasons={settings.savedReasons}
         />
 
+        {/* Additional Message */}
         <TextField
           fullWidth
-          label="Additional Message (optional)"
-          placeholder="Any additional details..."
+          label="💬 Additional Message (optional)"
+          placeholder="Any additional details you'd like to share..."
           value={additionalMessage}
           onChange={(e) => setAdditionalMessage(e.target.value)}
           multiline
           rows={3}
-          sx={{ mb: 2 }}
+          sx={{ 
+            mb: 2,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              background: 'white',
+            },
+          }}
         />
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2, gap: 1, flexWrap: 'wrap' }}>
+      <DialogActions 
+        sx={{ 
+          px: 3, 
+          pb: 3, 
+          pt: 2,
+          gap: 1.5,
+          flexWrap: 'wrap',
+          background: '#FAF0E6',
+        }}
+      >
         <Button
           onClick={handleClose}
           startIcon={<CloseIcon />}
-          color="inherit"
+          sx={{
+            color: 'text.secondary',
+            borderRadius: 2,
+            px: 2,
+          }}
         >
           Cancel
         </Button>
@@ -262,6 +315,16 @@ const CheckInForm = ({ open, onClose, type }) => {
           onClick={handleSendGmail}
           startIcon={loading.gmail ? <CircularProgress size={16} /> : <EmailIcon />}
           disabled={loading.gmail || loading.both}
+          sx={{
+            borderRadius: 2,
+            borderColor: 'primary.main',
+            color: 'primary.main',
+            fontWeight: 600,
+            '&:hover': {
+              borderColor: 'primary.dark',
+              background: 'rgba(255, 107, 53, 0.08)',
+            },
+          }}
         >
           {loading.gmail ? 'Sending...' : 'Gmail'}
         </Button>
@@ -271,6 +334,16 @@ const CheckInForm = ({ open, onClose, type }) => {
           onClick={handleSendSlack}
           startIcon={loading.slack ? <CircularProgress size={16} /> : <SendIcon />}
           disabled={loading.slack || loading.both}
+          sx={{
+            borderRadius: 2,
+            borderColor: 'primary.main',
+            color: 'primary.main',
+            fontWeight: 600,
+            '&:hover': {
+              borderColor: 'primary.dark',
+              background: 'rgba(255, 107, 53, 0.08)',
+            },
+          }}
         >
           {loading.slack ? 'Sending...' : 'Slack'}
         </Button>
@@ -278,8 +351,18 @@ const CheckInForm = ({ open, onClose, type }) => {
         <Button
           variant="contained"
           onClick={handleSendBoth}
-          startIcon={loading.both ? <CircularProgress size={16} /> : <SendIcon />}
+          startIcon={loading.both ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
           disabled={loading.gmail || loading.slack || loading.both}
+          sx={{
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #FF6B35 0%, #FF8C65 100%)',
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #E55A2B 0%, #FF6B35 100%)',
+              boxShadow: '0 6px 16px rgba(255, 107, 53, 0.4)',
+            },
+          }}
         >
           {loading.both ? 'Sending...' : 'Send Both'}
         </Button>

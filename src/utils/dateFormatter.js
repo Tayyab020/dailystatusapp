@@ -29,11 +29,13 @@ export const formatDateTime = () => {
   };
   
   /**
-   * Check if it's morning (before 2 PM) or evening
+   * Check if it's morning (8 AM - 5:59 PM) or evening/night (6 PM - 7:59 AM)
    */
   export const getTimeOfDay = () => {
     const hour = new Date().getHours();
-    return hour < 14 ? 'morning' : 'evening';
+    // Morning: 8:00 AM - 5:59 PM (hour 8-17)
+    // Evening/Night: 6:00 PM - 7:59 AM (hour 18-23 or 0-7)
+    return hour >= 8 && hour < 18 ? 'morning' : 'evening';
   };
   
   /**
