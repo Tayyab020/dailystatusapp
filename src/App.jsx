@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ThemeProvider,
   createTheme,
@@ -10,7 +10,7 @@ import {
 import AppHeader from "./components/AppHeader";
 import QuickActions from "./components/QuickActions";
 import { AppProvider, useApp } from "./context/AppContext";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import SlackCallback from "./components/SlackCallback";
 
 const theme = createTheme({
@@ -72,6 +72,52 @@ const theme = createTheme({
     },
   },
 });
+function HomeContent() {
+  const { settings, saveSettings, showNotification } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Check for OAuth token from direct redirect
+    const storedToken = localStorage.getItem('slack_oauth_token');
+    if (storedToken) {
+      try {
+        const tokenData = JSON.parse(storedToken);
+        const userName = `User ${tokenData.userId}`;
+        
+        saveSettings({
+          ...settings,
+          slackToken: tokenData.token,
+          slackUserId: tokenData.userId,
+          slackUserName: userName,
+          slackTeamName: tokenData.teamName
+        });
+        
+        showNotification('✅ Connected to Slack!', 'success');
+        localStorage.removeItem('slack_oauth_token');
+        
+        // Clean URL
+        setSearchParams({});
+      } catch (err) {
+        console.error('Error processing OAuth token:', err);
+      }
+    }
+
+    // Check for URL params
+    const slackError = searchParams.get('slack_error');
+    if (slackError) {
+      showNotification(`Slack OAuth error: ${slackError}`, 'error');
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, saveSettings, showNotification, settings]);
+
+  return (
+    <>
+      <AppHeader />
+      <QuickActions />
+    </>
+  );
+}
+
 function AppContent() {
   const { notification, closeNotification } = useApp();
 
@@ -81,12 +127,7 @@ function AppContent() {
         <Route path="/slack/callback" element={<SlackCallback />} />
         <Route
           path="/"
-          element={
-            <>
-              <AppHeader />
-              <QuickActions />
-            </>
-          }
+          element={<HomeContent />}
         />
       </Routes>
 
