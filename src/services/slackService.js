@@ -8,18 +8,31 @@ let slackUserId = null;
  */
 export const initiateSlackOAuth = () => {
   const clientId = import.meta.env.VITE_APP_SLACK_CLIENT_ID;
+  
+  // Debug: Check if client ID is loaded
+  console.log('Slack Client ID:', clientId ? 'Found' : 'MISSING');
+  console.log('All VITE env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
+  
+  if (!clientId) {
+    throw new Error('Slack Client ID is not configured. Please add VITE_APP_SLACK_CLIENT_ID to your .env file and restart the dev server.');
+  }
+  
   // Ensure redirect URI is clean and properly formatted
   const redirectUri = `${window.location.origin}/slack/callback`.replace(/\/+$/, '');
-  const scopes = 'chat:write,users:read';
+  
+  // Use user_scope instead of scope to send messages as the user (not as a bot)
+  const userScopes = 'chat:write,im:write'; // im:write for direct messages
   
   // Build URL with proper encoding
   const params = new URLSearchParams({
     client_id: clientId,
-    scope: scopes,
+    user_scope: userScopes, // user_scope sends messages as the user
     redirect_uri: redirectUri
   });
   
   const authUrl = `https://slack.com/oauth/v2/authorize?${params.toString()}`;
+  
+  console.log('OAuth URL:', authUrl.replace(clientId, 'CLIENT_ID_HIDDEN'));
   
   // Open in popup
   const width = 600;
