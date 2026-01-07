@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button, CircularProgress, Box, Typography } from '@mui/material';
-import { initiateSlackOAuth, exchangeSlackCode, getSlackUserInfo, signOutSlack } from '../services/slackService';
+import { initiateSlackOAuth, exchangeSlackCode, signOutSlack } from '../services/slackService';
 import { useApp } from '../context/AppContext';
 
 const SlackAuth = () => {
@@ -22,9 +22,8 @@ const SlackAuth = () => {
       const tokenResult = await exchangeSlackCode(result.code);
       
       if (tokenResult.success) {
-        // Try to get user info (optional - may fail without identity.basic scope)
-        const userInfo = await getSlackUserInfo(tokenResult.token);
-        const userName = userInfo.success ? userInfo.user.name : `User ${tokenResult.userId}`;
+        // Use userId from OAuth response (no need for userinfo API call)
+        const userName = `User ${tokenResult.userId}`;
         
         setSlackUser(userName);
         
@@ -37,7 +36,7 @@ const SlackAuth = () => {
           slackTeamName: tokenResult.teamName
         });
         
-        showNotification(`✅ Connected to Slack${userInfo.success ? ` as ${userName}` : ''}!`, 'success');
+        showNotification('✅ Connected to Slack!', 'success');
       } else {
         showNotification(tokenResult.error, 'error');
       }
