@@ -21,7 +21,7 @@ export const initiateSlackOAuth = () => {
   const redirectUri = `${window.location.origin}/slack/callback`.replace(/\/+$/, '');
   
   // Use user_scope instead of scope to send messages as the user (not as a bot)
-  const userScopes = 'chat:write,im:write'; // im:write for direct messages
+  const userScopes = 'chat:write,im:write,identity.basic'; // identity.basic needed for userinfo API
   
   // Build URL with proper encoding
   const params = new URLSearchParams({
@@ -191,34 +191,32 @@ export const setSlackToken = (token) => {
  */
 export const sendSlackMessage = async (token, channelId, text, threadTs = null) => {
   try {
-    const payload = {
-      channel: channelId,
-      text: text
-    };
+    // Use backend API to avoid CORS issues
+    const API_URL = import.meta.env.VITE_API_URL || "/api";
     
-    if (threadTs) {
-      payload.thread_ts = threadTs;
-    }
-    
-    const response = await fetch('https://slack.com/api/chat.postMessage', {
+    const response = await fetch(`${API_URL}/slack/message`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        token,
+        channelId,
+        text,
+        threadTs
+      })
     });
     
     const data = await response.json();
     
-    if (!data.ok) {
+    if (!data.success) {
       throw new Error(data.error || 'Failed to send Slack message');
     }
     
     return {
       success: true,
       ts: data.ts,
-      message: 'Message sent to Slack successfully!'
+      message: data.message || 'Message sent to Slack successfully!'
     };
     
   } catch (error) {
