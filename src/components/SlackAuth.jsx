@@ -22,26 +22,22 @@ const SlackAuth = () => {
       const tokenResult = await exchangeSlackCode(result.code);
       
       if (tokenResult.success) {
-        // Get user info
+        // Try to get user info (optional - may fail without identity.basic scope)
         const userInfo = await getSlackUserInfo(tokenResult.token);
+        const userName = userInfo.success ? userInfo.user.name : `User ${tokenResult.userId}`;
         
-        if (userInfo.success) {
-          const userName = userInfo.user.name;
-          setSlackUser(userName);
-          
-          // Save token to settings
-          saveSettings({
-            ...settings,
-            slackToken: tokenResult.token,
-            slackUserId: tokenResult.userId,
-            slackUserName: userName,
-            slackTeamName: tokenResult.teamName
-          });
-          
-          showNotification(`✅ Connected to Slack as ${userName}!`, 'success');
-        } else {
-          showNotification('Failed to get Slack user info', 'error');
-        }
+        setSlackUser(userName);
+        
+        // Save token to settings
+        saveSettings({
+          ...settings,
+          slackToken: tokenResult.token,
+          slackUserId: tokenResult.userId,
+          slackUserName: userName,
+          slackTeamName: tokenResult.teamName
+        });
+        
+        showNotification(`✅ Connected to Slack${userInfo.success ? ` as ${userName}` : ''}!`, 'success');
       } else {
         showNotification(tokenResult.error, 'error');
       }

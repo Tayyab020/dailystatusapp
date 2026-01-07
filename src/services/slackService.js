@@ -21,7 +21,7 @@ export const initiateSlackOAuth = () => {
   const redirectUri = `${window.location.origin}/slack/callback`.replace(/\/+$/, '');
   
   // Use user_scope instead of scope to send messages as the user (not as a bot)
-  const userScopes = 'chat:write,im:write,identity.basic'; // identity.basic needed for userinfo API
+  const userScopes = 'chat:write,im:write'; // User scopes for sending messages
   
   // Build URL with proper encoding
   const params = new URLSearchParams({
