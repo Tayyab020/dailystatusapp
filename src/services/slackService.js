@@ -65,39 +65,37 @@ export const initiateSlackOAuth = () => {
  */
 export const exchangeSlackCode = async (code) => {
   try {
-    const clientId = import.meta.env.VITE_APP_SLACK_CLIENT_ID;
-    const clientSecret = import.meta.env.VITE_APP_SLACK_CLIENT_SECRET;
-    const redirectUri = `${window.location.origin}/slack/callback`;
+    // Use backend API to exchange code (client secret stays on backend)
+    const API_URL = import.meta.env.VITE_API_URL || "/api";
+    const redirectUri = `${window.location.origin}/slack/callback`.replace(/\/+$/, '');
     
-    const response = await fetch('https://slack.com/api/oauth.v2.access', {
+    const response = await fetch(`${API_URL}/slack/oauth`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
+      body: JSON.stringify({
         code: code,
-        redirect_uri: redirectUri
+        redirectUri: redirectUri
       })
     });
     
     const data = await response.json();
     
-    if (!data.ok) {
+    if (!data.success) {
       throw new Error(data.error || 'Failed to exchange code');
     }
     
     // Store token
-    slackToken = data.authed_user.access_token;
-    slackUserId = data.authed_user.id;
+    slackToken = data.token;
+    slackUserId = data.userId;
     
     return {
       success: true,
       token: slackToken,
       userId: slackUserId,
-      teamId: data.team.id,
-      teamName: data.team.name
+      teamId: data.teamId,
+      teamName: data.teamName
     };
     
   } catch (error) {

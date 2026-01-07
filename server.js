@@ -2,6 +2,10 @@
 // This mimics Vercel serverless functions for local testing
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -13,6 +17,7 @@ app.use(express.json());
 // Import and use the serverless function handlers
 import messageHandler from "./api/slack/message.js";
 import testHandler from "./api/slack/test.js";
+import oauthHandler from "./api/slack/oauth.js";
 
 // Convert Vercel handler format to Express
 const adaptHandler = (handler) => {
@@ -36,8 +41,10 @@ const adaptHandler = (handler) => {
 // API routes
 app.post("/api/slack/message", adaptHandler(messageHandler));
 app.post("/api/slack/test", adaptHandler(testHandler));
+app.post("/api/slack/oauth", adaptHandler(oauthHandler));
 app.options("/api/slack/message", (req, res) => res.status(200).end());
 app.options("/api/slack/test", (req, res) => res.status(200).end());
+app.options("/api/slack/oauth", (req, res) => res.status(200).end());
 
 app.listen(PORT, () => {
   console.log(`🚀 Local API server running on http://localhost:${PORT}`);
