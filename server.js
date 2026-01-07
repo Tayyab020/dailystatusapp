@@ -18,6 +18,7 @@ app.use(express.json());
 import messageHandler from "./api/slack/message.js";
 import testHandler from "./api/slack/test.js";
 import oauthHandler from "./api/slack/oauth.js";
+import userinfoHandler from "./api/slack/userinfo.js";
 
 // Convert Vercel handler format to Express
 const adaptHandler = (handler) => {
@@ -42,9 +43,11 @@ const adaptHandler = (handler) => {
 app.post("/api/slack/message", adaptHandler(messageHandler));
 app.post("/api/slack/test", adaptHandler(testHandler));
 app.post("/api/slack/oauth", adaptHandler(oauthHandler));
+app.post("/api/slack/userinfo", adaptHandler(userinfoHandler));
 app.options("/api/slack/message", (req, res) => res.status(200).end());
 app.options("/api/slack/test", (req, res) => res.status(200).end());
 app.options("/api/slack/oauth", (req, res) => res.status(200).end());
+app.options("/api/slack/userinfo", (req, res) => res.status(200).end());
 
 app.listen(PORT, () => {
   console.log(`🚀 Local API server running on http://localhost:${PORT}`);

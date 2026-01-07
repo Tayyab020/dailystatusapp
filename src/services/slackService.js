@@ -125,16 +125,23 @@ export const exchangeSlackCode = async (code) => {
  */
 export const getSlackUserInfo = async (token) => {
   try {
-    const response = await fetch('https://slack.com/api/users.identity', {
+    // Use backend API to avoid CORS issues
+    const API_URL = import.meta.env.VITE_API_URL || "/api";
+    
+    const response = await fetch(`${API_URL}/slack/userinfo`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token: token
+      })
     });
     
     const data = await response.json();
     
-    if (!data.ok) {
-      throw new Error(data.error);
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to get user info');
     }
     
     return {
