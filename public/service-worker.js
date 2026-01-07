@@ -1,4 +1,4 @@
-const CACHE_NAME = 'checkin-messenger-v1';
+const CACHE_NAME = 'checkin-messenger-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,7 +7,9 @@ const urlsToCache = [
   '/static/js/0.chunk.js',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/favicon.png',
+  '/apple-touch-icon.png'
 ];
 
 // Install service worker
